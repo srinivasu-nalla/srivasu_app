@@ -4,34 +4,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Srivasu Apps</title>
+    <title>Srivasu</title>
 
     <style>
         body {
-            background-color: #F4F9ED;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1em;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .app-icons {
+            font-family: Garamond, serif;
+            font-size: 20px;
             text-align: center;
         }
+
+        h1 {
+            color: #3a241d;
+            text-align: center;
+        }
+
+        t {
+        font-family: Garamond, serif;
+        font-size: 16px;
+        text-align: center;
+        }
+
+        th {
+            color: #3a241d;
+            text-align: center;
+            font-size: 20px;
+        }
+
+
+        p {
+        font-family: Garamond, serif;
+        font-size: 16px;
+        font-weight: bold;
+        }
+
+		#left-container {
+                        background-color: #f2f2f2; /*  light gray */
+						width: 15%;
+						left: 0px;
+						top: 0px;
+						position: absolute;
+						height: 100%;
+						padding: 10px;
+					}
+
+		#right-container {
+                     background-color: #e6e6e6; /* another shade of gray */
+					width: 15%;
+					right: 0px;
+					top: 0px;
+					position: absolute;
+					height: 100%;
+					padding: 10px;
+                    font-size: 16px;
+						}
+        .app-icons {
+            text-align: center;
+            width: 45px;
+            height: 45px;
+        } 
+        .button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button_f {
+  background-color: #614caf; /* Green */
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #4CAF50;
+}
+
     </style>
 
 </head>
 
 <body>
-    <div class="app-icons">
-        <a href="https://grow.srivasu.com/"><img src="carrrer.png" alt="CARRRER" width="100"></a>
-        <p>CARRRER</p>
-        <a href="https://money.srivasu.com/"><img src="finance.png" alt="FINANCE" width="100"></a>
-        <p>FINANCE</p>
-        <a href="https://wellness.srivasu.com/"><img src="health.png" alt="HEALTH" width="100"></a>
-        <p>HEALTH</p>
+
+    <h1>Hi , Welcome </h1>
+    <h1> </h1>
+    <th>I am Srivasu, this page has my intrest,work in one place .</th>
+    <th>Please share your feedback on below link.</th>
+
+    
+
+    <div id="left-container" class="container">
+        <pre>  </pre>
+        <pre>  </pre>
+        <t>Please Click on below images link to open Sites</t>
+        <pre>  </pre>
+
+            <a href="https://grow.srivasu.com/"><img class="app-icons" src="carrrer.png"></a>
+            <p>Carrrer</p>
+            <a href="https://money.srivasu.com/"><img class="app-icons" src="finance.png"></a>
+            <p>Finance</p>
+            <a href="https://wellness.srivasu.com/"><img class="app-icons" src="health.png"></a>
+            <p>Health</p>
+    </div>
+
+    <div id="right-container" class="container">
+        <pre>  </pre>
+        <pre>  </pre>
+        <p>My Blogs</p>
+        <pre>  </pre>
+        <a href="https://srinalla.wordpress.com/" class="button">Tech Blog</a>
+        <a href="https://github.com/srinivasu-nalla/DBA_srivasu#readme" class="button">Tech Learnings</a>
+        <a href="https://project.srivasu.com/" class="button_f">Projects</a>
+            <pre> <p>Following on below  </p> </pre>
+            <a href="https://groww.in/digest" class="button_f">Groww Digest</a>
+            <a href="https://finshots.in/archive/" class="button_f">Finshots Daily</a>
+            <a href="https://www.linkedin.com/in/kirtanshahcfp/recent-activity/all/" class="button_f">Kirtan A Shah</a>
+            <a href="https://www.linkedin.com/in/neil-borate-1a435a57/recent-activity/all/" class="button_f">Neil Borate</a>
+            <a href="https://www.linkedin.com/newsletters/dreamers-and-unicorns-6739009776786698240/" class="button_f">Dreamers And Unicorns NEWSLETTER</a>
+        
     </div>
 </body>
 
