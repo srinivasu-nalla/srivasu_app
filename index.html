@@ -13,231 +13,18 @@
     <meta property="og:description" content="Finance, Career & Health resources">
     <meta property="og:type" content="website">
 
-    <!-- Font (optional but premium) -->
+    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        /* =========================
-   🎨 DESIGN TOKENS
-========================= */
-        :root {
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --border: #e5e7eb;
-
-            --radius: 14px;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        /* 🌙 Dark Mode */
-        .dark {
-            --bg: #020617;
-            --surface: #0f172a;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #1e293b;
-        }
-
-        /* =========================
-   GLOBAL
-========================= */
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        /* Accessibility */
-        :focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        /* =========================
-   LAYOUT
-========================= */
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            padding: 20px;
-        }
-
-        /* =========================
-   NAVBAR
-========================= */
-        header {
-            position: sticky;
-            top: 0;
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.7);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .dark header {
-            background: rgba(2, 6, 23, 0.7);
-        }
-
-        .nav {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            padding: 15px;
-        }
-
-        .nav a {
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
-            text-align: center;
-        }
-
-        .nav a:hover {
-            color: var(--accent);
-        }
-
-        .nav img {
-            width: 30px;
-            display: block;
-            margin: 0 auto 5px;
-        }
-
-        /* =========================
-   HERO
-========================= */
-        .hero {
-            text-align: center;
-            padding: 60px 20px 30px;
-        }
-
-        .hero h1 {
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            color: var(--text-muted);
-        }
-
-        /* =========================
-   GRID
-========================= */
-        .grid {
-            display: grid;
-            gap: 20px;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        /* =========================
-   CARD COMPONENT
-========================= */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow-sm);
-            transition: transform 0.25s, box-shadow 0.25s;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--accent);
-        }
-
-        .card h3 {
-            margin-top: 0;
-            font-size: 1.1rem;
-        }
-
-        .card p {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        /* =========================
-   LINKS
-========================= */
-        .links a {
-            display: flex;
-            justify-content: space-between;
-            text-decoration: none;
-            color: var(--accent);
-            margin: 8px 0;
-            font-size: 14px;
-        }
-
-        .links a:hover {
-            color: var(--accent-hover);
-        }
-
-        /* =========================
-   FOOTER
-========================= */
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            border-top: 1px solid var(--border);
-            margin-top: 40px;
-        }
-
-        footer a {
-            margin: 0 10px;
-            text-decoration: none;
-            font-size: 13px;
-            color: var(--text);
-            font-weight: 600;
-        }
-
-        footer a:hover {
-            color: var(--accent);
-        }
-
-        .copy {
-            margin-top: 10px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        /* =========================
-   DARK MODE BUTTON
-========================= */
-        .toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        /* Reduce motion */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                transition: none !important;
-            }
-        }
-    </style>
+    <!-- ✅ External CSS -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
+    <!-- =========================
+         NAVBAR
+    ========================== -->
     <header>
         <nav class="nav" aria-label="Main navigation">
             <a href="https://grow.srivasu.com/">
@@ -255,15 +42,21 @@
         </nav>
     </header>
 
+    <!-- =========================
+         MAIN
+    ========================== -->
     <main class="container">
 
+        <!-- HERO -->
         <section class="hero">
             <h1>Knowledge Hub</h1>
             <p>Finance • Career • Health — curated for growth</p>
         </section>
 
+        <!-- GRID -->
         <section class="grid">
 
+            <!-- CARD 1 -->
             <article class="card">
                 <h3>Business & Finance News</h3>
                 <p>what's happening in the world of business and finance</p>
@@ -277,6 +70,7 @@
                 </div>
             </article>
 
+            <!-- CARD 2 -->
             <article class="card">
                 <h3>Reading</h3>
                 <p>Telugu news article collection for reading.</p>
@@ -284,29 +78,34 @@
                     <a href="https://www.eenadu.net/antaryami" target="_blank" rel="noopener">Devotional →</a>
                     <a href="https://www.eenadu.net/youth/personality-development" target="_blank"
                         rel="noopener">Personality Development →</a>
-                    <a href="https://www.eenadu.net/sunday-magazine" target="_blank" rel="noopener">Sunday Magzine →</a>
+                    <a href="https://www.eenadu.net/sunday-magazine" target="_blank" rel="noopener">Sunday Magazine
+                        →</a>
                     <a href="https://www.eenadu.net/editorial" target="_blank" rel="noopener">Editorial News →</a>
                 </div>
             </article>
 
+            <!-- CARD 3 -->
             <article class="card">
-                <h3>Carrer News</h3>
-                <p>Blogs/news related to carrer Development.</p>
+                <h3>Career News</h3>
+                <p>Blogs/news related to career development.</p>
                 <div class="links">
                     <a href="https://www.linkedin.com/newsletters/dreamers-and-unicorns-6739009776786698240/"
-                        target="_blank" rel="noopener">Dreamers And Unicorns NEWSLETTER
-                        →</a>
-                    <a href="https://www.eenadu.net/education/career-guidance" target="_blank" rel="noopener">Guidance
-                        →</a>
+                        target="_blank" rel="noopener">
+                        Dreamers And Unicorns Newsletter →
+                    </a>
+                    <a href="https://www.eenadu.net/education/career-guidance" target="_blank" rel="noopener">
+                        Guidance →
+                    </a>
                 </div>
             </article>
 
+            <!-- CARD 4 -->
             <article class="card">
                 <h3>Health News</h3>
-                <p>Blogs/news related to Health Tips</p>
+                <p>Blogs/news related to health tips.</p>
                 <div class="links">
                     <a href="https://www.eenadu.net/women/health/" target="_blank" rel="noopener">Health →</a>
-                    <a href="https://www.eenadu.net/health/exercise-yoga" target="_blank" rel="noopener">Exercise-yoga
+                    <a href="https://www.eenadu.net/health/exercise-yoga" target="_blank" rel="noopener">Exercise & Yoga
                         →</a>
                     <a href="https://www.eenadu.net/health/food" target="_blank" rel="noopener">Health Food →</a>
                 </div>
@@ -316,6 +115,9 @@
 
     </main>
 
+    <!-- =========================
+         FOOTER
+    ========================== -->
     <footer>
         <div>
             <a href="https://srinalla.wordpress.com/">Tech Blog</a>
@@ -325,29 +127,11 @@
         <div class="copy" id="year"></div>
     </footer>
 
+    <!-- DARK MODE BUTTON -->
     <button class="toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">🌙</button>
 
-    <script>
-        (function () {
-            const root = document.documentElement;
-
-            // Load theme
-            if (localStorage.getItem('theme') === 'dark') {
-                root.classList.add('dark');
-            }
-
-            // Toggle
-            window.toggleTheme = function () {
-                const isDark = root.classList.toggle('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            };
-
-            // Year
-            document.getElementById('year').textContent =
-                `© ${new Date().getFullYear()} Srivasu`;
-
-        })();
-    </script>
+    <!-- ✅ External JS -->
+    <script src="script.js"></script>
 
 </body>
 
