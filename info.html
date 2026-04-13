@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Info Hub</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Script -->
+    <script src="info.js" defer></script>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="topbar">
+        <h1>📊 General Information Hub</h1>
+        <div id="stats"></div>
+    </header>
+
+    <main class="container wide">
+
+        <!-- SEARCH -->
+        <section class="controls-bar">
+            <input id="globalSearch" placeholder="Search anything..." />
+        </section>
+
+        <!-- TABLE -->
+        <section class="table-card">
+
+            <div id="loading" class="loading">Loading data...</div>
+
+            <table id="dataTable" hidden>
+                <thead>
+                    <tr>
+                        <th data-sort="Type">Type ⬍</th>
+                        <th>Link</th>
+                        <th data-sort="Comments">Comments ⬍</th>
+                        <th data-sort="Source">Source ⬍</th>
+                        <th data-sort="ContentType">Content ⬍</th>
+                    </tr>
+                </thead>
+
+                <tbody></tbody>
+            </table>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
