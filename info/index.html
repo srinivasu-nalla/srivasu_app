@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Info Hub</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles/styles.css">
+
+    <!-- PAGE IDENTIFIER -->
+    <script>
+        window.PAGE_TYPE = "info";
+    </script>
+
+    <!-- Shared Engine -->
+    <script src="/js/tableEngine.js" defer></script>
+    <script src="/js/loader.js" defer></script>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <h1>📊 General Information Hub</h1>
+        <div id="stats"></div>
+    </header>
+
+    <main class="container wide">
+
+        <!-- CONTROLS -->
+        <section class="controls-bar">
+            <select id="typeFilter">
+                <option value="all">All Types</option>
+            </select>
+
+            <input id="globalSearch" placeholder="Search anything..." />
+
+            <select id="pageSize">
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+            </select>
+        </section>
+
+        <!-- TABLE -->
+        <section class="table-card">
+
+            <div id="loading" class="loading">Loading data...</div>
+
+            <table id="dataTable" hidden>
+                <thead>
+                    <tr id="tableHeadRow"></tr>
+                    <tr class="column-filters" id="columnFiltersRow"></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <!-- PAGINATION -->
+            <div class="pagination">
+                <button id="prevBtn">← Prev</button>
+                <span id="pageInfo"></span>
+                <button id="nextBtn">Next →</button>
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
