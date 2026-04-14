@@ -4,10 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>DE Data Hub</title>
 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="/styles/styles.css">
+
+    <script>window.PAGE_TYPE = "de";</script>
+
+    <script src="/js/utils.js" defer></script>
+    <script src="/js/config.js" defer></script>
+    <script src="/js/tableEngine.js" defer></script>
+    <script src="/js/loader.js" defer></script>
 </head>
 
 <body>
@@ -19,14 +31,13 @@
 
     <main class="container wide">
 
-        <!-- CONTROLS -->
         <section class="controls-bar">
 
             <select id="typeFilter">
                 <option value="all">All Types</option>
             </select>
 
-            <input id="globalSearch" placeholder="Search everything..." />
+            <input id="globalSearch" placeholder="Search..." />
 
             <select id="pageSize">
                 <option value="10">10 rows</option>
@@ -34,15 +45,11 @@
                 <option value="50">50 rows</option>
             </select>
 
+            <!-- ✅ FIXED -->
+            <div id="columnToggle" class="column-toggle"></div>
+
         </section>
 
-        <!-- COLUMN TOGGLE -->
-        <section class="controls-bar">
-            <strong>Columns:</strong>
-            <div id="columnToggle"></div>
-        </section>
-
-        <!-- TABLE -->
         <section class="table-card">
 
             <div id="loading">Loading...</div>
@@ -50,30 +57,20 @@
             <table id="dataTable" hidden>
                 <thead>
                     <tr id="tableHeadRow"></tr>
-                    <tr id="columnFiltersRow" class="column-filters"></tr>
+                    <tr class="column-filters" id="columnFiltersRow"></tr>
                 </thead>
                 <tbody></tbody>
             </table>
 
-            <!-- PAGINATION -->
             <div class="pagination">
-                <button id="prevBtn">← Prev</button>
+                <button id="prevBtn">←</button>
                 <span id="pageInfo"></span>
-                <button id="nextBtn">Next →</button>
+                <button id="nextBtn">→</button>
             </div>
 
         </section>
 
     </main>
-
-    <script>
-        window.PAGE_TYPE = "de";
-    </script>
-
-    <script src="/js/utils.js"></script>
-    <script src="/js/config.js"></script>
-    <script src="/js/tableEngine.js"></script>
-    <script src="/js/loader.js"></script>
 
 </body>
 
