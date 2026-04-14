@@ -17,11 +17,18 @@ class TableEngine {
     }
 
     async fetchData() {
-        const res = await fetch(this.config.url);
-        const text = await res.text();
-        const json = JSON.parse(text.substring(47).slice(0, -2));
+        try {
+            const res = await fetch(this.config.url);
+            const text = await res.text();
+            const json = JSON.parse(text.substring(47).slice(0, -2));
 
-        this.data = json.table.rows.map(r => this.config.mapRow(r));
+            this.data = json.table.rows.map(r => this.config.mapRow(r));
+
+            console.log("✅ Data Loaded:", this.data);
+
+        } catch (err) {
+            console.error("❌ Fetch Error:", err);
+        }
     }
 
     setupUI() {
@@ -37,6 +44,8 @@ class TableEngine {
         const types = [...new Set(this.data.map(d => d.Type))];
         const filter = document.getElementById("typeFilter");
 
+        if (!filter) return;
+
         types.forEach(t => {
             const opt = document.createElement("option");
             opt.value = t;
@@ -48,31 +57,41 @@ class TableEngine {
     attachEvents() {
         const el = id => document.getElementById(id);
 
-        el("globalSearch")?.addEventListener("input", () => {
-            this.currentPage = 1;
-            this.render();
-        });
+        if (el("globalSearch")) {
+            el("globalSearch").addEventListener("input", () => {
+                this.currentPage = 1;
+                this.render();
+            });
+        }
 
-        el("typeFilter")?.addEventListener("change", () => {
-            this.currentPage = 1;
-            this.render();
-        });
+        if (el("typeFilter")) {
+            el("typeFilter").addEventListener("change", () => {
+                this.currentPage = 1;
+                this.render();
+            });
+        }
 
-        el("pageSize")?.addEventListener("change", e => {
-            this.pageSize = Number(e.target.value);
-            this.currentPage = 1;
-            this.render();
-        });
+        if (el("pageSize")) {
+            el("pageSize").addEventListener("change", (e) => {
+                this.pageSize = Number(e.target.value);
+                this.currentPage = 1;
+                this.render();
+            });
+        }
 
-        el("prevBtn")?.onclick = () => {
-            this.currentPage--;
-            this.render();
-        };
+        if (el("prevBtn")) {
+            el("prevBtn").onclick = () => {
+                this.currentPage--;
+                this.render();
+            };
+        }
 
-        el("nextBtn")?.onclick = () => {
-            this.currentPage++;
-            this.render();
-        };
+        if (el("nextBtn")) {
+            el("nextBtn").onclick = () => {
+                this.currentPage++;
+                this.render();
+            };
+        }
 
         document.querySelectorAll(".column-filters input").forEach(input => {
             input.addEventListener("input", () => {
@@ -92,8 +111,11 @@ class TableEngine {
     }
 
     getFilteredData() {
-        const search = document.getElementById("globalSearch")?.value.toLowerCase() || "";
-        const typeVal = document.getElementById("typeFilter")?.value || "all";
+        const searchInput = document.getElementById("globalSearch");
+        const typeInput = document.getElementById("typeFilter");
+
+        const search = searchInput ? searchInput.value.toLowerCase() : "";
+        const typeVal = typeInput ? typeInput.value : "all";
 
         const colFilters = {};
         document.querySelectorAll(".column-filters input").forEach(input => {
@@ -131,6 +153,8 @@ class TableEngine {
 
     render() {
         const tbody = document.querySelector("#dataTable tbody");
+        if (!tbody) return;
+
         tbody.innerHTML = "";
 
         const data = this.getFilteredData();
@@ -149,14 +173,23 @@ class TableEngine {
             tbody.appendChild(tr);
         });
 
-        document.getElementById("stats").textContent = `${total} records`;
+        if (document.getElementById("stats")) {
+            document.getElementById("stats").textContent = `${total} records`;
+        }
 
         const totalPages = Math.ceil(total / this.pageSize);
 
-        document.getElementById("pageInfo").textContent =
-            `Page ${this.currentPage} of ${totalPages}`;
+        if (document.getElementById("pageInfo")) {
+            document.getElementById("pageInfo").textContent =
+                `Page ${this.currentPage} of ${totalPages}`;
+        }
 
-        document.getElementById("prevBtn").disabled = this.currentPage === 1;
-        document.getElementById("nextBtn").disabled = this.currentPage >= totalPages;
+        if (document.getElementById("prevBtn")) {
+            document.getElementById("prevBtn").disabled = this.currentPage === 1;
+        }
+
+        if (document.getElementById("nextBtn")) {
+            document.getElementById("nextBtn").disabled = this.currentPage >= totalPages;
+        }
     }
 }
