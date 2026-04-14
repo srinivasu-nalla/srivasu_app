@@ -298,3 +298,11 @@ button {
     background: var(--surface);
     cursor: pointer;
 }
+
+.column-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12px;
+    margin-top: 8px;
+}
