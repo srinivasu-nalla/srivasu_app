@@ -6,20 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DE Data Hub</title>
 
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-    <!-- Styles -->
     <link rel="stylesheet" href="/styles/styles.css">
-
-    <!-- PAGE IDENTIFIER -->
-    <script>
-        window.PAGE_TYPE = "de";
-    </script>
-
-    <!-- Shared Engine -->
-    <script src="/js/tableEngine.js" defer></script>
-    <script src="/js/loader.js" defer></script>
 </head>
 
 <body>
@@ -33,28 +21,36 @@
 
         <!-- CONTROLS -->
         <section class="controls-bar">
+
             <select id="typeFilter">
                 <option value="all">All Types</option>
             </select>
 
-            <input id="globalSearch" placeholder="Search..." />
+            <input id="globalSearch" placeholder="Search everything..." />
 
             <select id="pageSize">
                 <option value="10">10 rows</option>
                 <option value="25">25 rows</option>
                 <option value="50">50 rows</option>
             </select>
+
+        </section>
+
+        <!-- COLUMN TOGGLE -->
+        <section class="controls-bar">
+            <strong>Columns:</strong>
+            <div id="columnToggle"></div>
         </section>
 
         <!-- TABLE -->
         <section class="table-card">
 
-            <div id="loading" class="loading">Loading data...</div>
+            <div id="loading">Loading...</div>
 
             <table id="dataTable" hidden>
                 <thead>
                     <tr id="tableHeadRow"></tr>
-                    <tr class="column-filters" id="columnFiltersRow"></tr>
+                    <tr id="columnFiltersRow" class="column-filters"></tr>
                 </thead>
                 <tbody></tbody>
             </table>
@@ -69,6 +65,15 @@
         </section>
 
     </main>
+
+    <script>
+        window.PAGE_TYPE = "de";
+    </script>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/tableEngine.js"></script>
+    <script src="/js/loader.js"></script>
 
 </body>
 
