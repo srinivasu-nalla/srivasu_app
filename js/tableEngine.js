@@ -2,49 +2,76 @@ class TableEngine {
     constructor(config) {
         this.config = config;
         this.data = [];
+        this.filteredData = [];
+
         this.currentPage = 1;
-        this.pageSize = config.pageSize || 10;
+        this.pageSize = 10;
+
         this.sortState = { key: null, asc: true };
 
         this.init();
     }
 
     async init() {
+        this.showLoading(true);
+
         await this.fetchData();
-        this.setupUI();
+
+        this.showLoading(false);
+
+        const table = document.getElementById("dataTable");
+        if (table) table.hidden = false;
+
+        this.populateTypeFilter();
         this.attachEvents();
         this.render();
     }
 
+    showLoading(show) {
+        const el = document.getElementById("loading");
+        if (el) el.style.display = show ? "block" : "none";
+    }
+
     async fetchData() {
         try {
+            const CACHE_KEY = "data_" + window.PAGE_TYPE;
+
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                this.data = JSON.parse(cached);
+                console.log("⚡ Loaded from cache");
+                return;
+            }
+
             const res = await fetch(this.config.url);
             const text = await res.text();
             const json = JSON.parse(text.substring(47).slice(0, -2));
 
             this.data = json.table.rows.map(r => this.config.mapRow(r));
 
-            console.log("✅ Data Loaded:", this.data);
+            localStorage.setItem(CACHE_KEY, JSON.stringify(this.data));
+
+            console.log("✅ Data fetched");
 
         } catch (err) {
-            console.error("❌ Fetch Error:", err);
+            console.error("❌ Fetch error:", err);
+            this.showError("Failed to load data");
         }
     }
 
-    setupUI() {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("dataTable").hidden = false;
-
-        if (this.config.enableTypeFilter) {
-            this.populateTypeFilter();
+    showError(msg) {
+        const el = document.getElementById("loading");
+        if (el) {
+            el.style.display = "block";
+            el.innerText = "❌ " + msg;
         }
     }
 
     populateTypeFilter() {
-        const types = [...new Set(this.data.map(d => d.Type))];
         const filter = document.getElementById("typeFilter");
-
         if (!filter) return;
+
+        const types = [...new Set(this.data.map(d => d.Type))];
 
         types.forEach(t => {
             const opt = document.createElement("option");
@@ -55,90 +82,118 @@ class TableEngine {
     }
 
     attachEvents() {
-        const el = id => document.getElementById(id);
 
-        if (el("globalSearch")) {
-            el("globalSearch").addEventListener("input", () => {
+        // GLOBAL SEARCH
+        const search = document.getElementById("globalSearch");
+        if (search) {
+            search.addEventListener("input", debounce(() => {
+                this.currentPage = 1;
+                this.render();
+            }, 300));
+        }
+
+        // COLUMN FILTER
+        document.querySelectorAll(".column-filters input").forEach(input => {
+            input.addEventListener("input", debounce(() => {
+                this.currentPage = 1;
+                this.render();
+            }, 300));
+        });
+
+        // TYPE FILTER
+        const typeFilter = document.getElementById("typeFilter");
+        if (typeFilter) {
+            typeFilter.addEventListener("change", () => {
                 this.currentPage = 1;
                 this.render();
             });
         }
 
-        if (el("typeFilter")) {
-            el("typeFilter").addEventListener("change", () => {
-                this.currentPage = 1;
-                this.render();
-            });
-        }
-
-        if (el("pageSize")) {
-            el("pageSize").addEventListener("change", (e) => {
+        // PAGE SIZE
+        const pageSize = document.getElementById("pageSize");
+        if (pageSize) {
+            pageSize.addEventListener("change", (e) => {
                 this.pageSize = Number(e.target.value);
                 this.currentPage = 1;
                 this.render();
             });
         }
 
-        if (el("prevBtn")) {
-            el("prevBtn").onclick = () => {
+        // PAGINATION
+        const prevBtn = document.getElementById("prevBtn");
+        if (prevBtn) {
+            prevBtn.onclick = () => {
                 this.currentPage--;
                 this.render();
             };
         }
 
-        if (el("nextBtn")) {
-            el("nextBtn").onclick = () => {
+        const nextBtn = document.getElementById("nextBtn");
+        if (nextBtn) {
+            nextBtn.onclick = () => {
                 this.currentPage++;
                 this.render();
             };
         }
 
-        document.querySelectorAll(".column-filters input").forEach(input => {
-            input.addEventListener("input", () => {
-                this.currentPage = 1;
+        // SORT
+        document.querySelectorAll("th[data-sort]").forEach(th => {
+            th.addEventListener("click", () => {
+                const key = th.dataset.sort;
+
+                if (this.sortState.key === key) {
+                    this.sortState.asc = !this.sortState.asc;
+                } else {
+                    this.sortState.key = key;
+                    this.sortState.asc = true;
+                }
+
                 this.render();
             });
         });
 
-        document.querySelectorAll("th[data-sort]").forEach(th => {
-            th.addEventListener("click", () => {
-                const key = th.dataset.sort;
-                this.sortState.asc = this.sortState.key === key ? !this.sortState.asc : true;
-                this.sortState.key = key;
-                this.render();
+        // COLUMN TOGGLE
+        document.querySelectorAll("#columnToggle input").forEach(cb => {
+            cb.addEventListener("change", () => {
+                const index = Number(cb.dataset.index);
+
+                document.querySelectorAll("#dataTable tr").forEach(row => {
+                    const cell = row.children[index];
+                    if (cell) {
+                        cell.style.display = cb.checked ? "" : "none";
+                    }
+                });
             });
         });
     }
 
-    getFilteredData() {
-        const searchInput = document.getElementById("globalSearch");
-        const typeInput = document.getElementById("typeFilter");
-
-        const search = searchInput ? searchInput.value.toLowerCase() : "";
-        const typeVal = typeInput ? typeInput.value : "all";
+    filterData() {
+        const search = document.getElementById("globalSearch")?.value.toLowerCase() || "";
+        const typeVal = document.getElementById("typeFilter")?.value || "all";
 
         const colFilters = {};
         document.querySelectorAll(".column-filters input").forEach(input => {
             colFilters[input.dataset.col] = input.value.toLowerCase();
         });
 
-        let data = this.data.filter(item => {
+        this.filteredData = this.data.filter(row => {
 
             const globalMatch = this.config.searchFields.some(field =>
-                (item[field] || "").toLowerCase().includes(search)
+                (row[field] || "").toLowerCase().includes(search)
             );
 
-            const typeMatch = (!this.config.enableTypeFilter || typeVal === "all" || item.Type === typeVal);
+            const typeMatch = (typeVal === "all" || row.Type === typeVal);
 
-            const columnMatch = Object.keys(colFilters).every(key =>
-                !colFilters[key] || (item[key] || "").toLowerCase().includes(colFilters[key])
-            );
+            const columnMatch = Object.keys(colFilters).every(key => {
+                const val = colFilters[key];
+                return !val || (row[key] || "").toLowerCase().includes(val);
+            });
 
             return globalMatch && typeMatch && columnMatch;
         });
 
         if (this.sortState.key) {
-            data.sort((a, b) => {
+            this.filteredData.sort((a, b) => {
                 const A = (a[this.sortState.key] || "").toLowerCase();
                 const B = (b[this.sortState.key] || "").toLowerCase();
 
@@ -147,49 +202,45 @@ class TableEngine {
                     : B.localeCompare(A);
             });
         }
-
-        return data;
     }
 
     render() {
+        this.filterData();
+
         const tbody = document.querySelector("#dataTable tbody");
         if (!tbody) return;
 
         tbody.innerHTML = "";
 
-        const data = this.getFilteredData();
+        const total = this.filteredData.length;
 
-        const total = data.length;
         const start = (this.currentPage - 1) * this.pageSize;
-        const paginated = data.slice(start, start + this.pageSize);
+        const rows = this.filteredData.slice(start, start + this.pageSize);
 
-        if (paginated.length === 0) {
+        if (rows.length === 0) {
             tbody.innerHTML = `<tr><td colspan="${this.config.columns.length}">No data</td></tr>`;
+            return;
         }
 
-        paginated.forEach(row => {
+        rows.forEach(row => {
             const tr = document.createElement("tr");
             tr.innerHTML = this.config.renderRow(row);
             tbody.appendChild(tr);
         });
 
-        if (document.getElementById("stats")) {
-            document.getElementById("stats").textContent = `${total} records`;
-        }
+        document.getElementById("stats").innerText = `${total} records`;
 
         const totalPages = Math.ceil(total / this.pageSize);
 
-        if (document.getElementById("pageInfo")) {
-            document.getElementById("pageInfo").textContent =
-                `Page ${this.currentPage} of ${totalPages}`;
+        const pageInfo = document.getElementById("pageInfo");
+        if (pageInfo) {
+            pageInfo.innerText = `Page ${this.currentPage} of ${totalPages}`;
         }
 
-        if (document.getElementById("prevBtn")) {
-            document.getElementById("prevBtn").disabled = this.currentPage === 1;
-        }
+        const prevBtn = document.getElementById("prevBtn");
+        if (prevBtn) prevBtn.disabled = this.currentPage === 1;
 
-        if (document.getElementById("nextBtn")) {
-            document.getElementById("nextBtn").disabled = this.currentPage >= totalPages;
-        }
+        const nextBtn = document.getElementById("nextBtn");
+        if (nextBtn) nextBtn.disabled = this.currentPage >= totalPages;
     }
 }

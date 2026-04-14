@@ -1,65 +1,44 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const configs = {
+    const config = CONFIGS[window.PAGE_TYPE];
 
-        de: {
-            url: "https://docs.google.com/spreadsheets/d/1vhnLcKes6ltHJZI5uPTcMfHRX9xjSdpckrR37FMtOgo/gviz/tq?tqx=out:json&sheet=DE_INFO",
-            columns: ["Type", "Link", "Comments"],
-            searchFields: ["Type", "Comments"],
+    if (!config) {
+        showError("Invalid page config");
+        return;
+    }
 
-            mapRow: (r) => ({
-                Type: r.c?.[0]?.v || "",
-                Link: r.c?.[1]?.v || "",
-                Comments: r.c?.[2]?.v || ""
-            }),
-
-            renderRow: (row) => `
-                <td>${row.Type}</td>
-                <td><a href="${row.Link}" target="_blank">Open →</a></td>
-                <td>${row.Comments}</td>
-            `
-        },
-
-        info: {
-            url: "https://docs.google.com/spreadsheets/d/1vhnLcKes6ltHJZI5uPTcMfHRX9xjSdpckrR37FMtOgo/gviz/tq?tqx=out:json&sheet=GENERAL",
-            columns: ["Type", "Link", "Comments", "Source", "ContentType"],
-            searchFields: ["Type", "Comments", "Source", "ContentType"],
-
-            mapRow: (r) => {
-                const link = r.c?.[1]?.v || "";
-
-                return {
-                    Type: r.c?.[0]?.v || "",
-                    Link: link,
-                    Comments: r.c?.[2]?.v || "",
-                    Source: detectSource(link),
-                    ContentType: detectContentType(link)
-                };
-            },
-
-            renderRow: (row) => `
-                <td>${row.Type}</td>
-                <td><a href="${row.Link}" target="_blank">Open →</a></td>
-                <td>${row.Comments}</td>
-                <td>${row.Source}</td>
-                <td>${row.ContentType}</td>
-            `
-        }
-    };
-
-    const config = configs[window.PAGE_TYPE];
+    // ✅ SAFETY: Ensure TableEngine exists
+    if (typeof TableEngine === "undefined") {
+        console.error("❌ TableEngine not loaded");
+        showError("App failed to load");
+        return;
+    }
 
     buildTableHeaders(config.columns);
+    buildColumnToggle(config.columns);
 
+    // ✅ INIT ENGINE
     new TableEngine({
         ...config,
         enableTypeFilter: true
     });
 });
 
+
+// =========================
+// HEADER BUILDER
+// =========================
 function buildTableHeaders(columns) {
     const headRow = document.getElementById("tableHeadRow");
     const filterRow = document.getElementById("columnFiltersRow");
+
+    if (!headRow || !filterRow) {
+        console.error("❌ Table header elements missing");
+        return;
+    }
+
+    headRow.innerHTML = "";
+    filterRow.innerHTML = "";
 
     columns.forEach(col => {
         const th = document.createElement("th");
@@ -71,8 +50,8 @@ function buildTableHeaders(columns) {
 
         if (col !== "Link") {
             const input = document.createElement("input");
-            input.placeholder = "Filter " + col;
             input.dataset.col = col;
+            input.placeholder = "Filter " + col;
             fth.appendChild(input);
         }
 
@@ -80,24 +59,41 @@ function buildTableHeaders(columns) {
     });
 }
 
-function detectSource(url) {
-    if (!url) return "Unknown";
-    url = url.toLowerCase();
 
-    if (/youtube|youtu/.test(url)) return "YouTube";
-    if (/instagram/.test(url)) return "Instagram";
-    if (/twitter|x/.test(url)) return "Twitter/X";
-    if (/linkedin/.test(url)) return "LinkedIn";
+// =========================
+// COLUMN TOGGLE
+// =========================
+function buildColumnToggle(columns) {
+    const container = document.getElementById("columnToggle");
 
-    return "Other";
+    if (!container) return;
+
+    // ✅ FIX: clear previous
+    container.innerHTML = "";
+
+    columns.forEach((col, index) => {
+        const label = document.createElement("label");
+
+        label.style.marginRight = "10px";
+
+        label.innerHTML = `
+            <input type="checkbox" checked data-index="${index}">
+            ${col}
+        `;
+
+        container.appendChild(label);
+    });
 }
 
-function detectContentType(url) {
-    if (!url) return "Unknown";
-    url = url.toLowerCase();
 
-    if (/youtube|youtu/.test(url)) return "Video";
-    if (/\.(jpg|png|gif)/.test(url)) return "Image";
+// =========================
+// ERROR UI
+// =========================
+function showError(msg) {
+    const el = document.getElementById("loading");
 
-    return "Link";
+    if (el) {
+        el.style.display = "block";
+        el.innerText = "❌ " + msg;
+    }
 }
