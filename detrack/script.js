@@ -1,3 +1,6 @@
+const API_URL = "https://script.google.com/macros/s/AKfycbyNK0gh6xLYxHCCm5EaNE8o_7BD-zbmf8kMkVDgIv4oxPtRlqxLopsF3BrNGaJ1rpAy4g/exec";
+
+// ===== PASSWORD =====
 const HASH = "954716ed1a7b6426ecc2cc2f0d17deb5";
 
 function md5(str) {
@@ -6,43 +9,59 @@ function md5(str) {
 
 if (sessionStorage.getItem("auth") !== "ok") {
     const input = prompt("Enter Password:");
-
     if (!input || md5(input) !== HASH) {
         document.body.innerHTML =
             "<h2 style='color:white;text-align:center;margin-top:20%'>Access Denied</h2>";
         throw new Error("Unauthorized");
     }
-
     sessionStorage.setItem("auth", "ok");
 }
-document.addEventListener("DOMContentLoaded", () => {
+
+// ===== MAIN =====
+document.addEventListener("DOMContentLoaded", async () => {
 
     const GROUPS = [
-        {
-            id: 'g1', label: '01 — Foundations', cls: 'g1',
-            topics: ['Python', 'SQL', 'Git']
-        },
-        {
-            id: 'g2', label: '02 — Data Engineering Core', cls: 'g2',
-            topics: ['DE Concepts & Terminology', 'PySpark', 'Databricks', 'Cloud (Azure & AWS)', 'Data Engineering Projects']
-        },
-        {
-            id: 'g3', label: '03 — DE Tools', cls: 'g3',
-            topics: ['Snowflake', 'DBT', 'Apache Kafka', 'Airflow']
-        },
-        {
-            id: 'g4', label: '04 — Senior DE', cls: 'g4',
-            topics: ['Advanced Data Modeling', 'System Design & Architecture', 'Cost & Performance Optimization']
-        },
-        {
-            id: 'g5', label: '05 — Final: Get Hired', cls: 'g5',
-            topics: ['Improve & Learn', 'Build Portfolio', 'Optimize LinkedIn', 'Build Resume', 'Job Applications']
-        }
+        { id: 'g1', label: '01 — Foundations', cls: 'g1', topics: ['Python', 'SQL', 'Git'] },
+        { id: 'g2', label: '02 — Data Engineering Core', cls: 'g2', topics: ['DE Concepts & Terminology', 'PySpark', 'Databricks', 'Cloud (Azure & AWS)', 'Data Engineering Projects'] },
+        { id: 'g3', label: '03 — DE Tools', cls: 'g3', topics: ['Snowflake', 'DBT', 'Apache Kafka', 'Airflow'] },
+        { id: 'g4', label: '04 — Senior DE', cls: 'g4', topics: ['Advanced Data Modeling', 'System Design & Architecture', 'Cost & Performance Optimization'] },
+        { id: 'g5', label: '05 — Final: Get Hired', cls: 'g5', topics: ['Improve & Learn', 'Build Portfolio', 'Optimize LinkedIn', 'Build Resume', 'Job Applications'] }
     ];
 
     const SCORE_COLS = ['lc', 'hp', 'it', 'mp'];
 
-    let state = JSON.parse(localStorage.getItem('de_tracker_v2') || '{}');
+    let state = {};
+
+    // ===== LOAD CACHE FIRST (FAST) =====
+    const cached = localStorage.getItem("de_cache");
+    if (cached) {
+        state = JSON.parse(cached);
+    }
+
+    // ===== LOAD FROM GOOGLE SHEET (ASYNC) =====
+    async function loadData() {
+        try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+
+            data.forEach(row => {
+                state[row.key] = {
+                    lc: Number(row.lc) || 0,
+                    hp: Number(row.hp) || 0,
+                    it: Number(row.it) || 0,
+                    mp: Number(row.mp) || 0,
+                    duration: row.duration || '',
+                    notes: row.notes || ''
+                };
+            });
+
+            localStorage.setItem("de_cache", JSON.stringify(state));
+
+            refreshUI(); // update after load
+        } catch (e) {
+            console.log("Sheet load failed, using cache");
+        }
+    }
 
     function getRow(gid, topic) {
         const key = `${gid}||${topic}`;
@@ -50,8 +69,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return state[key];
     }
 
-    function saveState() {
-        localStorage.setItem('de_tracker_v2', JSON.stringify(state));
+    // ===== SAVE =====
+    async function saveRow(key, row) {
+        localStorage.setItem("de_cache", JSON.stringify(state)); // instant save
+
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ key, ...row })
+        });
 
         document.getElementById('last-saved').textContent =
             new Date().toLocaleTimeString();
@@ -59,8 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const t = document.getElementById('save-toast');
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 1500);
-
-        updateGlobalStats();
     }
 
     function starWidget(gid, topic, col, init) {
@@ -80,8 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     el.classList.toggle('on', idx < row[col]);
                 });
 
-                saveState();
+                saveRow(`${gid}||${topic}`, row);
                 updateGroupProgress(gid);
+                updateGlobalStats();
             };
 
             wrap.appendChild(s);
@@ -140,46 +164,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function buildGroup(g, delay) {
-
         const sec = document.createElement('div');
         sec.className = `group-section ${g.cls}`;
         sec.style.animationDelay = delay + 's';
 
         sec.innerHTML = `
-    <div class="group-header">
-      <div class="group-header-left">
-        <span class="group-number">${g.label.split('—')[0]}</span>
-        <span class="group-name">${g.label.split('—')[1]}</span>
-      </div>
-      <div class="group-mini-bar gmb-${g.id}">
-        <div class="mini-bar-track">
-          <div class="mini-bar-fill"></div>
+        <div class="group-header">
+          <div class="group-header-left">
+            <span class="group-number">${g.label.split('—')[0]}</span>
+            <span class="group-name">${g.label.split('—')[1]}</span>
+          </div>
+          <div class="group-mini-bar gmb-${g.id}">
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill"></div>
+            </div>
+            <span class="mini-pct">0%</span>
+            <span class="chevron">▾</span>
+          </div>
         </div>
-        <span class="mini-pct">0%</span>
-        <span class="chevron">▾</span>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>Topic</th>
-            <th>LC</th><th>HP</th><th>IT</th><th>MP</th>
-            <th>Duration</th><th>Notes</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  `;
-
-        const header = sec.querySelector('.group-header');
-        header.onclick = () => sec.classList.toggle('collapsed');
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Topic</th>
+                <th>LC</th><th>HP</th><th>IT</th><th>MP</th>
+                <th>Duration</th><th>Notes</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>`;
 
         const tbody = sec.querySelector('tbody');
 
         g.topics.forEach((topic, i) => {
-
             const row = getRow(g.id, topic);
             const tr = document.createElement('tr');
 
@@ -195,33 +213,37 @@ document.addEventListener("DOMContentLoaded", () => {
             const inp = document.createElement('input');
             inp.className = 'editable';
             inp.value = row.duration;
-            inp.onchange = () => { row.duration = inp.value; saveState(); };
+            inp.onchange = () => saveRow(`${g.id}||${topic}`, row);
             d.appendChild(inp);
 
             const n = document.createElement('td');
             const ta = document.createElement('textarea');
             ta.className = 'editable';
             ta.value = row.notes;
-            ta.onchange = () => { row.notes = ta.value; saveState(); };
+            ta.onchange = () => saveRow(`${g.id}||${topic}`, row);
             n.appendChild(ta);
 
             tr.appendChild(d);
             tr.appendChild(n);
-
             tbody.appendChild(tr);
         });
 
         return sec;
     }
 
+    function refreshUI() {
+        GROUPS.forEach(g => updateGroupProgress(g.id));
+        updateGlobalStats();
+    }
+
+    // ===== INITIAL RENDER (FAST) =====
     const container = document.getElementById('groups-container');
 
     GROUPS.forEach((g, i) => {
         const sec = buildGroup(g, i * 0.05);
         container.appendChild(sec);
-        updateGroupProgress(g.id);
     });
 
-    updateGlobalStats();
-
+    refreshUI();     // instant UI
+    loadData();      // async update
 });
