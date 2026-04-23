@@ -56,8 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             localStorage.setItem("de_cache", JSON.stringify(state));
-
-            refreshUI(); // update after load
+            refreshUI(); 
         } catch (e) {
             console.log("Sheet load failed, using cache");
         }
@@ -71,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // ===== SAVE =====
     async function saveRow(key, row) {
-        localStorage.setItem("de_cache", JSON.stringify(state)); // instant save
+        localStorage.setItem("de_cache", JSON.stringify(state));
 
         fetch(API_URL, {
             method: "POST",
@@ -82,8 +81,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             new Date().toLocaleTimeString();
 
         const t = document.getElementById('save-toast');
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 1500);
+        if(t) {
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 1500);
+        }
     }
 
     function starWidget(gid, topic, col, init) {
@@ -110,57 +111,52 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             wrap.appendChild(s);
         }
-
         return wrap;
     }
 
     function groupAvg(gid) {
         const g = GROUPS.find(x => x.id === gid);
         let tot = 0, cnt = 0;
-
         g.topics.forEach(t => {
             const r = getRow(gid, t);
             SCORE_COLS.forEach(c => { tot += r[c]; cnt++; });
         });
-
         return cnt ? tot / cnt : 0;
     }
 
     function updateGroupProgress(gid) {
         const pct = Math.round((groupAvg(gid) / 5) * 100);
-
         const fill = document.querySelector(`.gmb-${gid} .mini-bar-fill`);
         const pctEl = document.querySelector(`.gmb-${gid} .mini-pct`);
-
         if (fill) fill.style.width = pct + '%';
         if (pctEl) pctEl.textContent = pct + '%';
     }
 
     function updateGlobalStats() {
         let tot = 0, cnt = 0;
-
         GROUPS.forEach(g => g.topics.forEach(t => {
             const r = getRow(g.id, t);
             SCORE_COLS.forEach(c => { tot += r[c]; cnt++; });
         }));
 
         const pct = Math.round((tot / (cnt * 5)) * 100);
-
-        document.getElementById('overall-fill').style.width = pct + '%';
-        document.getElementById('overall-pct').textContent = pct + '%';
+        const overallFill = document.getElementById('overall-fill');
+        const overallPct = document.getElementById('overall-pct');
+        
+        if(overallFill) overallFill.style.width = pct + '%';
+        if(overallPct) overallPct.textContent = pct + '%';
 
         const bar = document.getElementById('stats-bar');
-        bar.innerHTML = '';
-
-        GROUPS.forEach(g => {
-            const gp = Math.round((groupAvg(g.id) / 5) * 100);
-
-            const pill = document.createElement('div');
-            pill.className = `stat-pill ${g.cls}`;
-            pill.innerHTML = `<span class="dot"></span>${g.label} <strong>${gp}%</strong>`;
-
-            bar.appendChild(pill);
-        });
+        if(bar) {
+            bar.innerHTML = '';
+            GROUPS.forEach(g => {
+                const gp = Math.round((groupAvg(g.id) / 5) * 100);
+                const pill = document.createElement('div');
+                pill.className = `stat-pill ${g.cls}`;
+                pill.innerHTML = `<span class="dot"></span>${g.label} <strong>${gp}%</strong>`;
+                bar.appendChild(pill);
+            });
+        }
     }
 
     function buildGroup(g, delay) {
@@ -209,18 +205,26 @@ document.addEventListener("DOMContentLoaded", async () => {
                 tr.appendChild(td);
             });
 
+            // FIXED: Duration update
             const d = document.createElement('td');
             const inp = document.createElement('input');
             inp.className = 'editable';
             inp.value = row.duration;
-            inp.onchange = () => saveRow(`${g.id}||${topic}`, row);
+            inp.onchange = () => {
+                row.duration = inp.value; // Sync input to state
+                saveRow(`${g.id}||${topic}`, row);
+            };
             d.appendChild(inp);
 
+            // FIXED: Notes update
             const n = document.createElement('td');
             const ta = document.createElement('textarea');
             ta.className = 'editable';
             ta.value = row.notes;
-            ta.onchange = () => saveRow(`${g.id}||${topic}`, row);
+            ta.onchange = () => {
+                row.notes = ta.value; // Sync textarea to state
+                saveRow(`${g.id}||${topic}`, row);
+            };
             n.appendChild(ta);
 
             tr.appendChild(d);
@@ -236,14 +240,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateGlobalStats();
     }
 
-    // ===== INITIAL RENDER (FAST) =====
+    // ===== INITIAL RENDER =====
     const container = document.getElementById('groups-container');
+    if(container) {
+        GROUPS.forEach((g, i) => {
+            const sec = buildGroup(g, i * 0.05);
+            container.appendChild(sec);
+        });
+    }
 
-    GROUPS.forEach((g, i) => {
-        const sec = buildGroup(g, i * 0.05);
-        container.appendChild(sec);
-    });
-
-    refreshUI();     // instant UI
-    loadData();      // async update
+    refreshUI();
+    loadData();
 });
